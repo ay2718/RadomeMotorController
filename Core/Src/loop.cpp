@@ -237,7 +237,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 				pdc.setPositionGains(0.0f);
 				pdc.setTrajectory(incoder.getAngle(), 0.0f);
 				motor_command.last_tick = HAL_GetTick() - 1000;
-
 			} else {
 				if (!incoder.isValid()) {
 					invalid_count++;
@@ -280,12 +279,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 }
 
-
+//
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
-	if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET) {
-		while(canHandler.popRx(FDCAN_RX_FIFO0) == HAL_OK) {
-			canHandler.processRxCAN(&motor_command, &motor_reply);
-		}
+//	if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET) {
+//
+//	}
+	while(canHandler.popRx(FDCAN_RX_FIFO0) == HAL_OK) {
+		canHandler.processRxCAN(&motor_command, &motor_reply);
+	}
+}
+
+void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs) {
+	while(canHandler.popRx(FDCAN_RX_FIFO1) == HAL_OK) {
+		canHandler.processRxCAN(&motor_command, &motor_reply);
 	}
 }
 

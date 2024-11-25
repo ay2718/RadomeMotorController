@@ -10,11 +10,60 @@
 #include <cmath>
 
 void CANHandler::start() {
+
+	// Configure the CAN peripheral
+	FDCAN_FilterTypeDef sFilterConfig = {0};
+
+	HAL_FDCAN_ConfigGlobalFilter(hfdcan,
+			FDCAN_REJECT, FDCAN_REJECT,
+			FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE);
+
+	sFilterConfig.IdType = FDCAN_STANDARD_ID;
+	sFilterConfig.FilterIndex = 0;
+	sFilterConfig.FilterType = FDCAN_FILTER_DUAL;
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+	sFilterConfig.FilterID1 = ID;
+	sFilterConfig.FilterID2 = 0x0;
+
+	if (HAL_FDCAN_ConfigFilter(hfdcan, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sFilterConfig.IdType = FDCAN_EXTENDED_ID;
+	sFilterConfig.FilterIndex = 0;
+	sFilterConfig.FilterType = FDCAN_FILTER_DUAL;
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+	sFilterConfig.FilterID1 = ID;
+	sFilterConfig.FilterID2 = 0x0;
+
+	if (HAL_FDCAN_ConfigFilter(hfdcan, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sFilterConfig.IdType = FDCAN_EXTENDED_ID;
+	sFilterConfig.FilterIndex = 1;
+	sFilterConfig.FilterType = FDCAN_FILTER_DUAL;
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
+	sFilterConfig.FilterID1 = 0x10000000 + ID;
+	sFilterConfig.FilterID2 = 0x10400000 + ID;
+
+	if (HAL_FDCAN_ConfigFilter(hfdcan, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+
 	if (HAL_FDCAN_Start(hfdcan) != HAL_OK) {
 		Error_Handler();
 	}
 
 	if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK) {
+		Error_Handler();
+	}
+
+	if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0) != HAL_OK) {
 		Error_Handler();
 	}
 
@@ -74,6 +123,16 @@ void CANHandler::printRxCAN(void) {
 void CANHandler::processRxCAN(motor_command_t* _cmd, motor_reply_t* _reply) {
 	uint32_t len = RxHeader.DataLength / FDCAN_DLC_BYTES_1;
 	uint32_t addr = RxHeader.Identifier;
+
+	if (addr == 0x10000000 + ID)
+	{
+		NVIC_SystemReset();
+	}
+
+	if (addr == 0x10400000 + ID)
+	{
+		// TODO offset learn mode
+	}
 
 	if (addr == ID) {
 		if (len == 5) {

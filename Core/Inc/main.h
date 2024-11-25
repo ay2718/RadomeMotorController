@@ -45,8 +45,8 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
-//#define AZIMUTH
-#define ELEVATION
+#define AZIMUTH
+//#define ELEVATION
 
 #ifdef AZIMUTH
 #ifdef MOTOR_DEFINED
@@ -97,7 +97,7 @@ extern "C" {
 #define PDC_MAX_CURRENT 15.0f
 
 #define EL_UPPER_HARDSTOP uint32_t(int32_t(0x1p32f * 2.0f / 360.0f)) // note that elevation is REVERSED!!!
-#define EL_LOWER_HARDSTOP uint32_t(int32_t(0x1p32f * -85.0f / 360.0f))
+#define EL_LOWER_HARDSTOP uint32_t(int32_t(0x1p32f * -87.0f / 360.0f))
 
 #endif
 
