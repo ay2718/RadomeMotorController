@@ -49,4 +49,13 @@ We feed the dish position *and* velocity because the velocity information in ord
 
 If you decide to build the firmware, this is an STM32CubeIDE project.  You may need to enable floating point support for printf.  Define or underine azimuth or elevation in Core/Inc/main.h to set azimuth or elevation.  Encoder offsets are hardcoded in.
 
+## CAN Bootloader usage
 
+`az_bootloader.bin` and `el_bootloader.bin` should already be loaded onto their respective motor drives.  The bootloader takes up 2 flash pages on each drive (4 kB)
+
+`flash_motor.py` is used to upload firmware over CAN bus.  The baud rate is 125000 (same as for operating the drives).
+
+Example usage: `./flash_motor.py` --id 0x01  -f radome_azimuth.bin`.
+The `--id` flag selects which drive to write toe (0x01 is azimuth, 0x02 is elevation) and the `-f` or `--filename` flag selects the binfile to upload.
+
+If a motor drive is unresponsive to being flashed, try running `./flash_motor.py ...`, leave it running, and cycle power to the motor drives.  This is useful if there's a problem with the firmware--`flash_motor.py` sends out pings to each motor's address every 100ms and the drives wait for pings in bootloader mode for 500ms before starting up.
